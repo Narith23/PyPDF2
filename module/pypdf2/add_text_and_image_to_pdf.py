@@ -11,7 +11,7 @@ from PyPDF2 import PdfReader, PdfWriter
 from helper.config import FONT_LOCATION, IMAGE_APPROVE_PATH_FILE, IMAGE_REJECT_PATH_FILE
 
 
-def add_text_and_image_to_pdf(target_pdf: str, data_dict: dict):
+def add_text_and_image_to_pdf(target_pdf: str, data_dict: dict, metadata: dict):
     # Register the custom font
     custom_font_name = "KhmerOSBattambang"
     pdfmetrics.registerFont(TTFont(custom_font_name, FONT_LOCATION))
@@ -93,24 +93,11 @@ def add_text_and_image_to_pdf(target_pdf: str, data_dict: dict):
 
         # Add the modified page to the output writer
         output.add_page(page)
-        
-        # Get the current datetime
-        now = datetime.now()
 
-        # Format the datetime in the desired format
-        formatted_datetime = now.strftime("D:%Y%m%d%H%M%S")
-        
-        # Define the metadata
-        metadata = {
-            '/Title': 'Sample Title',
-            '/Author': 'Author Name',
-            '/Subject': 'Sample Subject',
-            '/Keywords': 'keyword1, keyword2',
-            '/Creator': 'Your Application',
-            '/Producer': 'Your Application',
-            '/CreationDate': f'{formatted_datetime}',  # Format: D:YYYYMMDDHHMMSS
-        }
-        # Add metadata to the PDF
+        # Convert all metadata values to strings
+        metadata = {key: str(value) for key, value in metadata.items()}
+
+        # Add metadata to the output PDF
         output.add_metadata(metadata)
 
     # Make new name file

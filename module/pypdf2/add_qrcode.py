@@ -11,10 +11,6 @@ from helper.new_name import generate_new_name
 
 def add_image_to_pdf(target_pdf, position) -> str:
     try:
-        # Passwords
-        user_password = "viewpassword"  # Password required to open the document
-        owner_password = "editpassword"  # Password required for editing the document
-
         # Parameter
         new_name = generate_new_name()
         output_pdf = os.path.join("Files/Pre", f"{new_name}.pdf")
@@ -80,12 +76,6 @@ def add_image_to_pdf(target_pdf, position) -> str:
 
             # Add the modified page to the output writer
             output.add_page(page)
-
-            # output.encrypt(
-            #     user_password, 
-            #     owner_password, 
-            #     use_128bit=True # 128-bit encryption
-            # )
 
         # Write the modified PDF to the output file
         with open(output_pdf, "wb") as outputStream:

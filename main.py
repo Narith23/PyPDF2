@@ -1,11 +1,11 @@
 import os
 from datetime import datetime
 
-from module.add_qrcode import add_image_to_pdf
-from module.add_text_and_image_to_pdf import add_text_and_image_to_pdf
-from module.clear_form import clear_pdf_form
-from module.get_metadata import get_metadata
-from module.get_position import get_form_field_positions
+from module.pypdf2.add_qrcode import add_image_to_pdf
+from module.pypdf2.add_text_and_image_to_pdf import add_text_and_image_to_pdf
+from module.pypdf2.clear_form import clear_pdf_form
+from module.pypdf2.metadata import get_metadata, update_pdf_metadata
+from module.pypdf2.get_position import get_form_field_positions
 
 
 # Metadata
@@ -27,27 +27,28 @@ def extract_form_field_positions(target_pdf: str, data_dict: dict) -> str:
     if not name.lower().endswith(".pdf"):
         print("Error: The file is not a PDF.")
 
-    # Get Metadata from PDF
+    # Step 1 - Get Metadata from PDF
     print("==========================================")
     print("Step 1 - Get Metadata from PDF")
     print("==========================================")
     print("")
-    metadata = get_metadata(target_pdf)
-    if not metadata:
-        metadata.update(
-            {
-                "keywords": name.split(".pdf")[0],
-            }
-        )
+    metadata = dict(
+        keywords=dict(
+            doc_id=123,
+            version=1.0,
+        ),
+        systemDocument=True,
+    )
+    metadata_dict = get_metadata(target_pdf)
+    if metadata_dict:
+        metadata_dict.update(metadata)
+        print("Done!", metadata_dict)
     else:
-        metadata.update(
-            {
-                "keywords": name.split(".pdf")[0],
-            }
-        )
+        metadata_dict = metadata
+        print("Done!")
     print("")
 
-    # Step 1 - Get positions fields from PDF
+    # Step 2 - Get positions fields from PDF
     print("==========================================")
     print("Step 2 - Get positions fields from PDF")
     print("==========================================")
@@ -58,7 +59,7 @@ def extract_form_field_positions(target_pdf: str, data_dict: dict) -> str:
         print("Done!")
     print("")
 
-    # Step 2 - Clear PDF form
+    # Step 3 - Clear PDF form
     print("==========================================")
     print("Step 3 - Clear PDF form")
     print("==========================================")
@@ -72,7 +73,7 @@ def extract_form_field_positions(target_pdf: str, data_dict: dict) -> str:
         print("Done!")
     print("")
 
-    # Step 2 - Add QR Code to PDF
+    # Step 4 - Add QR Code to PDF
     print("==========================================")
     print("Step 4 - Add QR Code to PDF")
     print("==========================================")
@@ -86,12 +87,12 @@ def extract_form_field_positions(target_pdf: str, data_dict: dict) -> str:
         print("Done!")
     print("")
 
-    # Step 3 - Add Text and Image to PDF
+    # Step 5 - Add Text and Image to PDF
     print("==========================================")
     print("Step 5 - Add Text and Image to PDF")
     print("==========================================")
     print("")
-    add_text_and_image = add_text_and_image_to_pdf(target_pdf, data_dict)
+    add_text_and_image = add_text_and_image_to_pdf(target_pdf, data_dict, metadata_dict)
     if add_text_and_image:
         os.remove(target_pdf)
         print("Done!")
@@ -99,12 +100,14 @@ def extract_form_field_positions(target_pdf: str, data_dict: dict) -> str:
         print("Done!")
     print("")
 
+    return target_pdf
+
 
 target_pdf = "Files/Library/sample.pdf"
-data_dict = {
-    "Fields": dict(
-        value=str(),
-        action=str(),
-    )
-}
+data_dict = dict(
+    Requestor=dict(value="John Doe", action=None),
+    RequestorDate=dict(
+        value=datetime.now().strftime("%d/%m/%Y %H:%M:%S %p"), action=None
+    ),
+) 
 extract_form_field_positions(target_pdf, data_dict)
