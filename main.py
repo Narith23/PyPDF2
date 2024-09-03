@@ -17,7 +17,7 @@ def validate_pdf_file(file_path: str):
         raise ValueError("Error: The file is not a PDF.")
 
 
-def extract_form_field_positions(target_pdf: str, data_dict: dict) -> str:
+def extract_form_field_positions(target_pdf: str, data_dict: dict, metadata: dict) -> str:
     # Validation file target_pdf
     if os.path.exists(target_pdf) is False:
         print(f"File not found: {target_pdf}")
@@ -32,13 +32,6 @@ def extract_form_field_positions(target_pdf: str, data_dict: dict) -> str:
     print("Step 1 - Get Metadata from PDF")
     print("==========================================")
     print("")
-    metadata = dict(
-        keywords=dict(
-            doc_id=123,
-            version=1.0,
-        ),
-        systemDocument=True,
-    )
     metadata_dict = get_metadata(target_pdf)
     if metadata_dict:
         metadata_dict.update(metadata)
@@ -103,11 +96,20 @@ def extract_form_field_positions(target_pdf: str, data_dict: dict) -> str:
     return target_pdf
 
 
-target_pdf = "Files/Library/sample.pdf"
+target_pdf = "Files/Library/1725346969_854488_E49C67.pdf"
 data_dict = dict(
     Requestor=dict(value="John Doe", action=None),
     RequestorDate=dict(
         value=datetime.now().strftime("%d/%m/%Y %H:%M:%S %p"), action=None
     ),
-) 
-extract_form_field_positions(target_pdf, data_dict)
+)
+
+metadata = dict(
+    keywords=dict(
+        doc_id=123,
+        version=1.0,
+    ),
+    systemDocument=True,
+)
+
+extract_form_field_positions(target_pdf, data_dict, metadata)
