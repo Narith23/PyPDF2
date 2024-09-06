@@ -1,7 +1,10 @@
 from datetime import datetime
 from io import BytesIO
 import os
+import random
+import string
 import uuid
+import pikepdf
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
@@ -111,11 +114,55 @@ def add_text_and_image_to_pdf(target_pdf: str, data_dict: dict, metadata: dict):
         + "."
         + extension
     )
-    new_file = os.path.join("Files/Output", new_name_file)
+    new_file = os.path.join("Files/Pre", new_name_file)
     os.makedirs(os.path.dirname(new_file), exist_ok=True)
 
     # Write the modified PDF to the output file
     with open(new_file, "wb") as outputStream:
         output.write(outputStream)
 
-    return new_file
+    # Add Security to PDF File Use PIKEPDF
+    new_name_file = (
+        str(round(datetime.now().timestamp()))
+        + "_"
+        + str(datetime.now().microsecond)
+        + "_"
+        + uuid.uuid4().hex[:6].upper()
+        + "."
+        + extension
+    )
+    output_file = os.path.join("Files/Output", new_name_file)
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+
+    # Generate Strong Password
+    user_password = "".join(
+        random.choice(string.ascii_letters + string.digits) for _ in range(16)
+    )
+    print("User Password: ", user_password)
+    owner_password = "".join(
+        random.choice(string.ascii_letters + string.digits) for _ in range(16)
+    )
+    print("Owner Password: ", owner_password)
+
+    # Open the PDF file
+    with pikepdf.open(new_file) as file:
+        # Set permissions using correct flags
+        permissions = pikepdf.Permissions(
+            accessibility=False,  # Disable text extraction for accessibility
+            extract=False,  # Disable text and graphics extraction
+            modify_annotation=False,  # Disable annotation modifications
+            modify_assembly=False,  # Disable document assembly
+            modify_form=False,  # Disable form modification
+            print_lowres=False,  # Disable low-resolution printing
+            print_highres=False,  # Disable high-resolution printing
+        )
+
+        # Encrypt the PDF with passwords and permissions
+        file.save(
+            output_file,
+            encryption=pikepdf.Encryption(
+                user=user_password, owner=owner_password, allow=permissions
+            ),
+        )
+    os.remove(new_file)
+    return output_file

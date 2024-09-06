@@ -17,7 +17,9 @@ def validate_pdf_file(file_path: str):
         raise ValueError("Error: The file is not a PDF.")
 
 
-def extract_form_field_positions(target_pdf: str, data_dict: dict, metadata: dict) -> str:
+def extract_form_field_positions(
+    target_pdf: str, data_dict: dict, metadata: dict
+) -> str:
     # Validation file target_pdf
     if os.path.exists(target_pdf) is False:
         print(f"File not found: {target_pdf}")
